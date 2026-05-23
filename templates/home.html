@@ -1,0 +1,619 @@
+{% extends "base.html" %}
+{% block title %}Home — AquaTox Predictor{% endblock %}
+
+{% block head %}
+<style>
+  /* ── Reset nav for dark hero ── */
+  body { overflow-x: hidden; }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(32px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes countUp {
+    from { opacity: 0; transform: translateY(10px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes lineGrow {
+    from { width: 0; }
+    to   { width: 100%; }
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(14,165,233,0.15); }
+    50%       { box-shadow: 0 0 0 10px rgba(14,165,233,0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition: opacity 0.65s cubic-bezier(.22,.61,.36,1),
+                transform 0.65s cubic-bezier(.22,.61,.36,1);
+  }
+  .reveal.visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .reveal-delay-1 { transition-delay: 0.1s; }
+  .reveal-delay-2 { transition-delay: 0.2s; }
+  .reveal-delay-3 { transition-delay: 0.3s; }
+  .reveal-delay-4 { transition-delay: 0.4s; }
+  .reveal-delay-5 { transition-delay: 0.5s; }
+  .reveal-delay-6 { transition-delay: 0.6s; }
+
+  /* ── HERO ── */
+  .hero-section {
+    text-align: center;
+    padding: 5rem 1rem 4rem;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .hero-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    color: #0369a1;
+    font-size: 0.78rem;
+    font-weight: 600;
+    padding: 0.3rem 0.9rem;
+    border-radius: 999px;
+    margin-bottom: 1.5rem;
+    animation: fadeIn 0.8s ease both;
+  }
+  .hero-section h1 {
+    font-size: clamp(2.2rem, 5vw, 3.2rem);
+    font-weight: 800;
+    line-height: 1.1;
+    letter-spacing: -0.03em;
+    margin-bottom: 1.25rem;
+    animation: fadeUp 0.9s cubic-bezier(.22,.61,.36,1) 0.1s both;
+  }
+  .hero-section h1 .accent { color: #0ea5e9; }
+  .hero-section p {
+    font-size: 1.05rem;
+    color: #6b7280;
+    line-height: 1.75;
+    margin-bottom: 2.25rem;
+    animation: fadeUp 0.9s cubic-bezier(.22,.61,.36,1) 0.2s both;
+  }
+  .hero-btns {
+    display: flex;
+    gap: 0.75rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    animation: fadeUp 0.9s cubic-bezier(.22,.61,.36,1) 0.3s both;
+  }
+  .btn-hero-primary {
+    padding: 0.75rem 1.75rem;
+    background: #0ea5e9;
+    color: white;
+    border-radius: 10px;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+    transition: background 0.15s, transform 0.15s;
+    animation: pulse 2.5s ease 1.5s infinite;
+  }
+  .btn-hero-primary:hover { background: #0284c7; transform: translateY(-1px); }
+  .btn-hero-outline {
+    padding: 0.75rem 1.75rem;
+    background: transparent;
+    color: #374151;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-decoration: none;
+    border: 1.5px solid #e5e7eb;
+    transition: border-color 0.15s, color 0.15s, transform 0.15s;
+  }
+  .btn-hero-outline:hover { border-color: #0ea5e9; color: #0ea5e9; transform: translateY(-1px); }
+
+  /* ── DIVIDER LINE ── */
+  .divider-line {
+    height: 1px;
+    background: #f1f5f9;
+    margin: 0;
+  }
+
+  /* ── STATS STRIP ── */
+  .stats-strip {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    background: white;
+    border-top: 1px solid #f1f5f9;
+    border-bottom: 1px solid #f1f5f9;
+    margin-bottom: 5rem;
+  }
+  .stat-item {
+    padding: 2rem 1rem;
+    text-align: center;
+    border-right: 1px solid #f1f5f9;
+  }
+  .stat-item:last-child { border-right: none; }
+  .stat-num {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #0ea5e9;
+    line-height: 1;
+    margin-bottom: 0.35rem;
+    letter-spacing: -0.02em;
+  }
+  .stat-lbl {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: #9ca3af;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+
+  /* ── SECTION ── */
+  .section {
+    max-width: 1060px;
+    margin: 0 auto;
+    padding: 0 1rem 5rem;
+  }
+  .section-eyebrow {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #0ea5e9;
+    margin-bottom: 0.6rem;
+  }
+  .section-heading {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.75rem;
+    color: #111827;
+  }
+  .section-sub {
+    font-size: 0.95rem;
+    color: #6b7280;
+    line-height: 1.7;
+    max-width: 540px;
+    margin-bottom: 2.5rem;
+  }
+
+  /* ── PIPELINE STEPS ── */
+  .pipeline-steps {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 0;
+    position: relative;
+    margin-bottom: 1rem;
+  }
+  .pipeline-steps::before {
+    content: '';
+    position: absolute;
+    top: 22px;
+    left: calc(100% / 14);
+    right: calc(100% / 14);
+    height: 2px;
+    background: #e5e7eb;
+    z-index: 0;
+  }
+  .pipe-step {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.6rem;
+    position: relative;
+    z-index: 1;
+  }
+  .pipe-num {
+    width: 44px; height: 44px;
+    border-radius: 50%;
+    background: white;
+    border: 2px solid #e5e7eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 0.9rem;
+    color: #9ca3af;
+    transition: all 0.4s ease;
+  }
+  .pipe-step.active .pipe-num {
+    background: #0ea5e9;
+    border-color: #0ea5e9;
+    color: white;
+    transform: scale(1.1);
+  }
+  .pipe-lbl {
+    font-size: 0.72rem;
+    font-weight: 600;
+    color: #9ca3af;
+    text-align: center;
+    line-height: 1.3;
+    transition: color 0.4s;
+  }
+  .pipe-step.active .pipe-lbl { color: #0ea5e9; }
+
+  /* ── MODEL CARDS ── */
+  .model-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.25rem;
+    margin-bottom: 5rem;
+  }
+  .model-card {
+    background: white;
+    border: 1px solid #f1f5f9;
+    border-radius: 14px;
+    padding: 1.75rem;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .model-card:hover { border-color: #bae6fd; transform: translateY(-2px); }
+  .model-card-title {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #9ca3af;
+    margin-bottom: 1rem;
+  }
+  .model-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f9fafb;
+    font-size: 0.875rem;
+  }
+  .model-row:last-child { border-bottom: none; }
+  .model-name { display: flex; align-items: center; gap: 0.5rem; color: #374151; }
+  .model-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .model-badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+  }
+  .badge-best { background: #d1fae5; color: #065f46; }
+  .badge-score { background: #f0f9ff; color: #0369a1; }
+
+  /* ── FEATURE CARDS ── */
+  .feature-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.25rem;
+    margin-bottom: 5rem;
+  }
+  .feature-card {
+    background: white;
+    border: 1px solid #f1f5f9;
+    border-radius: 14px;
+    padding: 1.75rem;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .feature-card:hover { border-color: #bae6fd; transform: translateY(-2px); }
+  .feat-icon {
+    width: 40px; height: 40px;
+    background: #f0f9ff;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    margin-bottom: 1rem;
+  }
+  .feature-card h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.4rem;
+  }
+  .feature-card p {
+    font-size: 0.83rem;
+    color: #6b7280;
+    line-height: 1.65;
+  }
+
+  /* ── CTA ── */
+  .cta-section {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 20px;
+    padding: 3.5rem 2rem;
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+  .cta-section h2 {
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #0c4a6e;
+    margin-bottom: 0.75rem;
+  }
+  .cta-section p {
+    font-size: 0.95rem;
+    color: #0369a1;
+    margin-bottom: 1.75rem;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- HERO -->
+<div class="hero-section">
+  <div class="hero-chip">🐟 Fish &nbsp;·&nbsp; 🦐 Crustacean &nbsp;·&nbsp; 🌿 Algae</div>
+  <h1>Predict Aquatic <span class="accent">LC50 Toxicity</span><br>Without Animal Testing</h1>
+  <p>A machine learning pipeline trained on the ADORE ecotoxicity dataset.<br>13 models. Full SHAP explainability. Classification and regression.</p>
+  <div class="hero-btns">
+    <a href="/predict" class="btn-hero-primary">🔬 Run a Prediction</a>
+    <a href="/about" class="btn-hero-outline">Learn More →</a>
+  </div>
+</div>
+
+<!-- STATS STRIP -->
+<div class="stats-strip">
+  <div class="stat-item reveal">
+    <div class="stat-num" data-target="13">0</div>
+    <div class="stat-lbl">ML Models</div>
+  </div>
+  <div class="stat-item reveal reveal-delay-1">
+    <div class="stat-num">0.885</div>
+    <div class="stat-lbl">Best ROC AUC</div>
+  </div>
+  <div class="stat-item reveal reveal-delay-2">
+    <div class="stat-num">26K+</div>
+    <div class="stat-lbl">Training Rows</div>
+  </div>
+  <div class="stat-item reveal reveal-delay-3">
+    <div class="stat-num" data-target="3">0</div>
+    <div class="stat-lbl">Species Groups</div>
+  </div>
+  <div class="stat-item reveal reveal-delay-4">
+    <div class="stat-num">150+</div>
+    <div class="stat-lbl">Features Used</div>
+  </div>
+</div>
+
+<!-- PIPELINE SECTION -->
+<div class="section">
+  <div class="reveal">
+    <div class="section-eyebrow">How it works</div>
+    <div class="section-heading">End-to-end ML pipeline</div>
+    <div class="section-sub">From raw ecotoxicity data to explainable predictions — every step designed to prevent leakage and maximise scientific rigour.</div>
+  </div>
+
+  <div class="reveal reveal-delay-1">
+    <div class="pipeline-steps" id="pipeline">
+      <div class="pipe-step" data-step="0">
+        <div class="pipe-num">1</div>
+        <div class="pipe-lbl">Load &<br>Filter</div>
+      </div>
+      <div class="pipe-step" data-step="1">
+        <div class="pipe-num">2</div>
+        <div class="pipe-lbl">Feature<br>Engineering</div>
+      </div>
+      <div class="pipe-step" data-step="2">
+        <div class="pipe-num">3</div>
+        <div class="pipe-lbl">Grouped<br>CV Split</div>
+      </div>
+      <div class="pipe-step" data-step="3">
+        <div class="pipe-num">4</div>
+        <div class="pipe-lbl">Grid Search<br>Tuning</div>
+      </div>
+      <div class="pipe-step" data-step="4">
+        <div class="pipe-num">5</div>
+        <div class="pipe-lbl">Classify<br>& Regress</div>
+      </div>
+      <div class="pipe-step" data-step="5">
+        <div class="pipe-num">6</div>
+        <div class="pipe-lbl">SHAP<br>Analysis</div>
+      </div>
+      <div class="pipe-step" data-step="6">
+        <div class="pipe-num">7</div>
+        <div class="pipe-lbl">Predict<br>New Input</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Pipeline detail cards -->
+  <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-top:2rem">
+    <div class="reveal reveal-delay-1" style="background:white;border:1px solid #f1f5f9;border-radius:12px;padding:1.25rem">
+      <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#0ea5e9;margin-bottom:0.5rem">Data</div>
+      <div style="font-size:0.85rem;font-weight:600;color:#111827;margin-bottom:0.3rem">ADORE t-F2F</div>
+      <div style="font-size:0.8rem;color:#6b7280">~26,000 fish mortality records filtered by LC50 + MOR</div>
+    </div>
+    <div class="reveal reveal-delay-2" style="background:white;border:1px solid #f1f5f9;border-radius:12px;padding:1.25rem">
+      <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#0ea5e9;margin-bottom:0.5rem">Features</div>
+      <div style="font-size:0.85rem;font-weight:600;color:#111827;margin-bottom:0.3rem">150+ columns</div>
+      <div style="font-size:0.8rem;color:#6b7280">Fingerprints, Mordred, Mol2Vec, experimental conditions</div>
+    </div>
+    <div class="reveal reveal-delay-3" style="background:white;border:1px solid #f1f5f9;border-radius:12px;padding:1.25rem">
+      <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#0ea5e9;margin-bottom:0.5rem">Validation</div>
+      <div style="font-size:0.85rem;font-weight:600;color:#111827;margin-bottom:0.3rem">Grouped CV</div>
+      <div style="font-size:0.8rem;color:#6b7280">StratifiedGroupKFold prevents same-chemical leakage across folds</div>
+    </div>
+    <div class="reveal reveal-delay-4" style="background:white;border:1px solid #f1f5f9;border-radius:12px;padding:1.25rem">
+      <div style="font-size:0.7rem;font-weight:700;text-transform:uppercase;letter-spacing:0.08em;color:#0ea5e9;margin-bottom:0.5rem">Explainability</div>
+      <div style="font-size:0.85rem;font-weight:600;color:#111827;margin-bottom:0.3rem">Full SHAP</div>
+      <div style="font-size:0.8rem;color:#6b7280">Beeswarm + summary bar + cross-model comparison for all 13 models</div>
+    </div>
+  </div>
+</div>
+
+<!-- MODELS SECTION -->
+<div class="section">
+  <div class="reveal">
+    <div class="section-eyebrow">Model Performance</div>
+    <div class="section-heading">13 models, two tasks</div>
+    <div class="section-sub">Every model tuned with GridSearchCV and evaluated on a held-out grouped test set.</div>
+  </div>
+
+  <div class="model-grid">
+    <div class="model-card reveal reveal-delay-1">
+      <div class="model-card-title">Classification — ROC AUC</div>
+      <div class="model-row">
+        <div class="model-name"><div class="model-dot" style="background:#E07B39"></div>XGBoost</div>
+        <span class="model-badge badge-best">🏆 0.885</span>
+      </div>
+      <div class="model-row">
+        <div class="model-name"><div class="model-dot" style="background:#C0392B"></div>MLP Neural Network</div>
+        <span class="model-badge badge-score">0.882</span>
+      </div>
+      <div class="model-row">
+        <div class="model-name"><div class="model-dot" style="background:#2C6E94"></div>Random Forest</div>
+        <span class="model-badge badge-score">0.862</span>
+      </div>
+      <div class="model-row">
+        <div class="model-name"><div class="model-dot" style="background:#3A9E6F"></div>LightGBM</div>
+        <span class="model-badge badge-score">0.859</span>
+      </div>
+      <div class="model-row">
+        <div class="model-name"><div class="model-dot" style="background:#7F8C8D"></div>Gaussian NB</div>
+        <span class="model-badge badge-score">0.847</span>
+      </div>
+      <div class="model-row">
+        <div class="model-name"><div class="model-dot" style="background:#1ABC9C"></div>KNN</div>
+        <span class="model-badge badge-score">0.810</span>
+      </div>
+      <div class="model-row">
+        <div class="model-name"><div class="model-dot" style="background:#A85C9E"></div>Logistic Regression</div>
+        <span class="model-badge badge-score">0.793</span>
+      </div>
+    </div>
+
+    <div class="model-card reveal reveal-delay-2">
+      <div class="model-card-title">Regression — predicting log(LC50)</div>
+      <div class="model-row">
+        <div class="model-name"><div class="model-dot" style="background:#E07B39"></div>XGBoost Regressor</div>
+        <span class="model-badge badge-best">🏆 Best R²</span>
+      </div>
+      <div class="model-row">
+        <div class="model-name"><div class="model-dot" style="background:#3A9E6F"></div>LightGBM Regressor</div>
+        <span class="model-badge badge-score">R² + RMSE</span>
+      </div>
+      <div class="model-row">
+        <div class="model-name"><div class="model-dot" style="background:#2C6E94"></div>Random Forest Reg.</div>
+        <span class="model-badge badge-score">R² + RMSE</span>
+      </div>
+      <div class="model-row">
+        <div class="model-name"><div class="model-dot" style="background:#1ABC9C"></div>MLP Regressor</div>
+        <span class="model-badge badge-score">R² + RMSE</span>
+      </div>
+      <div class="model-row">
+        <div class="model-name"><div class="model-dot" style="background:#2C6E94"></div>Ridge Regression</div>
+        <span class="model-badge badge-score">R² + RMSE</span>
+      </div>
+      <div class="model-row">
+        <div class="model-name"><div class="model-dot" style="background:#A85C9E"></div>Lasso Regression</div>
+        <span class="model-badge badge-score">R² + RMSE</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES SECTION -->
+<div class="section">
+  <div class="reveal">
+    <div class="section-eyebrow">Feature Engineering</div>
+    <div class="section-heading">Rich molecular representation</div>
+    <div class="section-sub">Six categories of features combine chemical structure, molecular properties and experimental context.</div>
+  </div>
+
+  <div class="feature-grid">
+    <div class="feature-card reveal reveal-delay-1">
+      <div class="feat-icon">🧬</div>
+      <h3>Molecular Fingerprints</h3>
+      <p>PubChem, MACCS, Morgan and ToxPrint bit-strings expanded to top 128 most variable bits each.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-2">
+      <div class="feat-icon">📐</div>
+      <h3>Mordred Descriptors</h3>
+      <p>Hundreds of computed molecular descriptors covering topology, geometry, electronic and constitutional properties.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-3">
+      <div class="feat-icon">🔢</div>
+      <h3>Mol2Vec Embeddings</h3>
+      <p>300-dimensional neural molecular embeddings trained on chemical structure, capturing structural similarity.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-4">
+      <div class="feat-icon">🌡️</div>
+      <h3>Experimental Conditions</h3>
+      <p>Test duration, pH, temperature, exposure type and media type reflecting real-world lab conditions.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-5">
+      <div class="feat-icon">🐠</div>
+      <h3>Species Descriptors</h3>
+      <p>Taxonomic ecology features covering climate zone, food web, migration and life history traits.</p>
+    </div>
+    <div class="feature-card reveal reveal-delay-6">
+      <div class="feat-icon">📊</div>
+      <h3>SHAP Explainability</h3>
+      <p>Full beeswarm, summary bar and cross-model SHAP comparison for every classifier and regressor.</p>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div class="section">
+  <div class="cta-section reveal">
+    <h2>Ready to predict toxicity?</h2>
+    <p>Enter a chemical's properties and get instant LC50 predictions from 13 trained models.</p>
+    <a href="/predict" class="btn-hero-primary" style="display:inline-flex;align-items:center;gap:0.5rem;text-decoration:none">
+      🔬 Run a Prediction
+    </a>
+  </div>
+</div>
+
+<script>
+  // ── Scroll reveal ──
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.12 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // ── Pipeline step animator ──
+  let currentStep = 0;
+  const steps = document.querySelectorAll('.pipe-step');
+  function animatePipeline() {
+    steps.forEach((s, i) => {
+      if (i <= currentStep) s.classList.add('active');
+      else s.classList.remove('active');
+    });
+    currentStep = (currentStep + 1) % (steps.length + 1);
+    if (currentStep === 0) {
+      steps.forEach(s => s.classList.remove('active'));
+    }
+  }
+  setInterval(animatePipeline, 600);
+
+  // ── Counter animation ──
+  const counters = document.querySelectorAll('[data-target]');
+  const counterObserver = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        const target = parseInt(e.target.dataset.target);
+        let count = 0;
+        const step = Math.ceil(target / 20);
+        const timer = setInterval(() => {
+          count = Math.min(count + step, target);
+          e.target.textContent = count;
+          if (count >= target) clearInterval(timer);
+        }, 60);
+        counterObserver.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.5 });
+  counters.forEach(c => counterObserver.observe(c));
+</script>
+{% endblock %}

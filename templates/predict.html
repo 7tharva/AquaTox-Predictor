@@ -1,0 +1,631 @@
+{% extends "base.html" %}
+{% block title %}Predict — AquaTox Predictor{% endblock %}
+
+{% block head %}
+<style>
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes shimmer {
+    0%   { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+  @keyframes popIn {
+    0%   { opacity: 0; transform: scale(0.92); }
+    100% { opacity: 1; transform: scale(1); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.55s cubic-bezier(.22,.61,.36,1),
+                transform 0.55s cubic-bezier(.22,.61,.36,1);
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.08s; }
+  .reveal-delay-2 { transition-delay: 0.16s; }
+  .reveal-delay-3 { transition-delay: 0.24s; }
+
+  /* PAGE HEADER */
+  .page-header {
+    margin-bottom: 2rem;
+    animation: fadeUp 0.7s cubic-bezier(.22,.61,.36,1) both;
+  }
+  .page-header h2 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.3rem;
+    color: #111827;
+  }
+  .page-header p { font-size: 0.9rem; color: #6b7280; }
+
+  /* LAYOUT */
+  .predict-layout {
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  /* INPUT PANEL */
+  .input-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    animation: fadeUp 0.7s cubic-bezier(.22,.61,.36,1) 0.1s both;
+  }
+  .input-card {
+    background: white;
+    border: 1px solid #f1f5f9;
+    border-radius: 14px;
+    padding: 1.25rem 1.5rem;
+    transition: border-color 0.2s;
+  }
+  .input-card:hover { border-color: #e0f2fe; }
+
+  .card-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #9ca3af;
+    margin-bottom: 0.85rem;
+  }
+
+  /* SPECIES SELECTOR */
+  .species-row { display: flex; gap: 0.5rem; }
+  .species-btn {
+    flex: 1;
+    padding: 0.55rem 0.5rem;
+    border: 1.5px solid #f1f5f9;
+    border-radius: 9px;
+    background: white;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.15s;
+    text-align: center;
+  }
+  .species-btn:hover { border-color: #bae6fd; color: #0369a1; }
+  .species-btn.active {
+    border-color: #0ea5e9;
+    background: #f0f9ff;
+    color: #0284c7;
+  }
+
+  /* FORM ELEMENTS */
+  .field { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.75rem; }
+  .field:last-child { margin-bottom: 0; }
+  .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
+  .field label {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+  }
+  .field input[type="number"],
+  .field select {
+    padding: 0.5rem 0.7rem;
+    border: 1.5px solid #f1f5f9;
+    border-radius: 8px;
+    font-size: 0.875rem;
+    font-family: inherit;
+    color: #111827;
+    background: white;
+    width: 100%;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field input[type="number"]:focus,
+  .field select:focus {
+    outline: none;
+    border-color: #0ea5e9;
+    box-shadow: 0 0 0 3px rgba(14,165,233,0.1);
+  }
+
+  /* SLIDERS */
+  .slider-field { margin-bottom: 0.85rem; }
+  .slider-field:last-child { margin-bottom: 0; }
+  .slider-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.3rem;
+  }
+  .slider-top label { font-size: 0.75rem; font-weight: 600; color: #6b7280; }
+  .slider-top .val {
+    font-size: 0.8rem;
+    font-weight: 700;
+    color: #0ea5e9;
+    min-width: 48px;
+    text-align: right;
+  }
+  input[type="range"] {
+    width: 100%;
+    accent-color: #0ea5e9;
+    cursor: pointer;
+    height: 4px;
+  }
+
+  /* PREDICT BUTTON */
+  .predict-btn {
+    width: 100%;
+    padding: 0.9rem;
+    background: #0ea5e9;
+    color: white;
+    border: none;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    transition: background 0.15s, transform 0.15s;
+    letter-spacing: -0.01em;
+  }
+  .predict-btn:hover:not(:disabled) { background: #0284c7; transform: translateY(-1px); }
+  .predict-btn:disabled {
+    background: linear-gradient(90deg, #bae6fd 25%, #e0f2fe 50%, #bae6fd 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.2s infinite;
+    cursor: not-allowed;
+    color: #0369a1;
+  }
+  .spinner {
+    width: 18px; height: 18px;
+    border: 2.5px solid rgba(3,105,161,0.3);
+    border-top-color: #0369a1;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    display: none;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* RESULTS PANEL */
+  .results-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    animation: fadeUp 0.7s cubic-bezier(.22,.61,.36,1) 0.2s both;
+  }
+
+  /* PLACEHOLDER */
+  .placeholder-card {
+    background: white;
+    border: 1.5px dashed #e5e7eb;
+    border-radius: 14px;
+    padding: 4rem 2rem;
+    text-align: center;
+    color: #9ca3af;
+  }
+  .placeholder-card .icon { font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5; }
+  .placeholder-card p { font-size: 0.875rem; line-height: 1.6; }
+
+  /* RESULT CARDS */
+  .result-card {
+    background: white;
+    border: 1px solid #f1f5f9;
+    border-radius: 14px;
+    padding: 1.5rem;
+    display: none;
+    animation: popIn 0.4s cubic-bezier(.22,.61,.36,1) both;
+  }
+  .result-card.show { display: block; }
+
+  .result-section-label {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #9ca3af;
+    margin-bottom: 1rem;
+  }
+
+  /* CLASSIFICATION HERO */
+  .clf-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+  }
+  .clf-label-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 1rem;
+    border-radius: 10px;
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
+  .clf-label-badge.toxic { background: #fef2f2; color: #b91c1c; border: 1px solid #fecaca; }
+  .clf-label-badge.safe  { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
+
+  .prob-block { text-align: right; }
+  .prob-number {
+    font-size: 2rem;
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+  .prob-number.toxic { color: #ef4444; }
+  .prob-number.safe  { color: #22c55e; }
+  .prob-label { font-size: 0.75rem; color: #9ca3af; margin-top: 0.2rem; }
+
+  .prob-bar-bg {
+    height: 6px;
+    background: #f1f5f9;
+    border-radius: 999px;
+    overflow: hidden;
+    margin-bottom: 0.5rem;
+  }
+  .prob-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    transition: width 0.8s cubic-bezier(.22,.61,.36,1);
+    width: 0%;
+  }
+  .prob-bar-fill.toxic { background: #ef4444; }
+  .prob-bar-fill.safe  { background: #22c55e; }
+
+  .best-model-note {
+    font-size: 0.78rem;
+    color: #9ca3af;
+    margin-top: 0.4rem;
+  }
+  .best-model-note span { color: #374151; font-weight: 600; }
+
+  /* REGRESSION HERO */
+  .reg-hero {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.75rem;
+    margin-bottom: 1.25rem;
+  }
+  .reg-metric {
+    background: #f9fafb;
+    border-radius: 10px;
+    padding: 1rem;
+    text-align: center;
+  }
+  .reg-metric .rm-label { font-size: 0.72rem; color: #9ca3af; font-weight: 600; margin-bottom: 0.3rem; }
+  .reg-metric .rm-value {
+    font-size: 1.4rem;
+    font-weight: 800;
+    color: #111827;
+    letter-spacing: -0.02em;
+  }
+  .reg-metric .rm-unit { font-size: 0.72rem; color: #9ca3af; margin-top: 0.15rem; }
+
+  /* COMPARISON TABLES */
+  .cmp-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
+  .cmp-table th {
+    text-align: left;
+    padding: 0.45rem 0.6rem;
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: #9ca3af;
+    border-bottom: 1px solid #f1f5f9;
+  }
+  .cmp-table td {
+    padding: 0.5rem 0.6rem;
+    border-bottom: 1px solid #f9fafb;
+    color: #374151;
+  }
+  .cmp-table tr:last-child td { border-bottom: none; }
+  .cmp-table tr.best td { background: #f0f9ff; font-weight: 600; color: #0284c7; }
+
+  .bar-cell { display: flex; align-items: center; gap: 0.5rem; }
+  .mini-bg { flex: 1; height: 5px; background: #f1f5f9; border-radius: 999px; overflow: hidden; }
+  .mini-fill { height: 100%; border-radius: 999px; background: #0ea5e9; transition: width 0.6s ease; }
+
+  .hr { border: none; border-top: 1px solid #f1f5f9; margin: 1.25rem 0; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h2>Run a Prediction</h2>
+  <p>Enter chemical properties and experimental conditions to predict LC50 toxicity across 13 trained models.</p>
+</div>
+
+<div class="predict-layout">
+
+  <!-- ── INPUT PANEL ── -->
+  <div class="input-panel">
+
+    <div class="input-card">
+      <div class="card-label">Target Species</div>
+      <div class="species-row">
+        <button class="species-btn active" onclick="selectSpecies(this,'fish')">🐟 Fish</button>
+        <button class="species-btn" onclick="selectSpecies(this,'crustacean')">🦐 Crustacean</button>
+        <button class="species-btn" onclick="selectSpecies(this,'algae')">🌿 Algae</button>
+      </div>
+      <input type="hidden" id="species" value="fish">
+    </div>
+
+    <div class="input-card">
+      <div class="card-label">Molecular Structure</div>
+
+      <div class="slider-field">
+        <div class="slider-top">
+          <label>Molecular Weight (g/mol)</label>
+          <span class="val" id="mw-val">200</span>
+        </div>
+        <input type="range" id="mol_weight" min="18" max="900" value="200"
+               oninput="document.getElementById('mw-val').textContent=this.value">
+      </div>
+
+      <div class="slider-field">
+        <div class="slider-top">
+          <label>cLogP (Lipophilicity)</label>
+          <span class="val" id="clogp-val">2.0</span>
+        </div>
+        <input type="range" id="clogp" min="-5" max="12" step="0.1" value="2"
+               oninput="document.getElementById('clogp-val').textContent=parseFloat(this.value).toFixed(1)">
+      </div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Heavy Atom Count</label>
+          <input type="number" id="heavy_atoms" value="15" min="1" max="100">
+        </div>
+        <div class="field">
+          <label>Ring Count</label>
+          <input type="number" id="ring_count" value="1" min="0" max="20">
+        </div>
+      </div>
+
+      <div class="field-row" style="margin-top:0.65rem">
+        <div class="field">
+          <label>Double Bonds</label>
+          <input type="number" id="double_bonds" value="1" min="0" max="20">
+        </div>
+        <div class="field">
+          <label>OH Groups</label>
+          <input type="number" id="oh_groups" value="0" min="0" max="20">
+        </div>
+      </div>
+
+      <div class="slider-field" style="margin-top:0.75rem">
+        <div class="slider-top">
+          <label>Water Solubility (log mol/L)</label>
+          <span class="val" id="ws-val">−3.0</span>
+        </div>
+        <input type="range" id="water_solubility" min="-10" max="2" step="0.1" value="-3"
+               oninput="document.getElementById('ws-val').textContent=parseFloat(this.value).toFixed(1)">
+      </div>
+    </div>
+
+    <div class="input-card">
+      <div class="card-label">Experimental Conditions</div>
+
+      <div class="field-row">
+        <div class="field">
+          <label>Duration (h)</label>
+          <input type="number" id="duration" value="96" min="1" max="672">
+        </div>
+        <div class="field">
+          <label>pH</label>
+          <input type="number" id="ph" value="7.4" min="4" max="10" step="0.1">
+        </div>
+      </div>
+
+      <div class="slider-field" style="margin-top:0.75rem">
+        <div class="slider-top">
+          <label>Temperature (°C)</label>
+          <span class="val" id="temp-val">20°C</span>
+        </div>
+        <input type="range" id="temperature" min="4" max="35" value="20"
+               oninput="document.getElementById('temp-val').textContent=this.value+'°C'">
+      </div>
+
+      <div class="field" style="margin-top:0.65rem">
+        <label>Exposure Type</label>
+        <select id="exposure_type">
+          <option value="static">Static</option>
+          <option value="flow-through">Flow-through</option>
+          <option value="semi-static">Semi-static</option>
+        </select>
+      </div>
+    </div>
+
+    <button class="predict-btn" id="predict-btn" onclick="runPrediction()">
+      <span id="btn-text">🔬 Run ML Prediction</span>
+      <div class="spinner" id="spinner"></div>
+    </button>
+
+  </div>
+
+  <!-- ── RESULTS PANEL ── -->
+  <div class="results-panel">
+
+    <!-- Placeholder -->
+    <div class="placeholder-card" id="placeholder">
+      <div class="icon">🧪</div>
+      <p>Fill in the chemical properties on the left<br>and click <strong>Run ML Prediction</strong> to see results.</p>
+    </div>
+
+    <!-- Classification Result -->
+    <div class="result-card" id="clf-card">
+      <div class="result-section-label">Classification Result</div>
+      <div class="clf-hero">
+        <div id="clf-badge"></div>
+        <div class="prob-block">
+          <div class="prob-number" id="prob-number">—</div>
+          <div class="prob-label">Acute 1 Probability</div>
+        </div>
+      </div>
+      <div class="prob-bar-bg">
+        <div class="prob-bar-fill" id="prob-bar"></div>
+      </div>
+      <div class="best-model-note">Best classifier: <span id="best-clf"></span></div>
+    </div>
+
+    <!-- Regression Result -->
+    <div class="result-card" id="reg-card">
+      <div class="result-section-label">Regression Result — Predicted log(LC50)</div>
+      <div class="reg-hero">
+        <div class="reg-metric">
+          <div class="rm-label">Predicted LC50</div>
+          <div class="rm-value" id="lc50-val">—</div>
+          <div class="rm-unit">mg/L</div>
+        </div>
+        <div class="reg-metric">
+          <div class="rm-label">Log LC50</div>
+          <div class="rm-value" id="log-lc50-val">—</div>
+          <div class="rm-unit">log(mg/L)</div>
+        </div>
+        <div class="reg-metric">
+          <div class="rm-label">Best R²</div>
+          <div class="rm-value" id="best-r2-val">—</div>
+          <div class="rm-unit" id="best-reg-name">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Classifier Comparison -->
+    <div class="result-card" id="clf-cmp-card">
+      <div class="result-section-label">Classifier Comparison — ROC AUC</div>
+      <table class="cmp-table">
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>ROC AUC</th>
+            <th>Accuracy</th>
+            <th>Macro F1</th>
+            <th style="width:90px"></th>
+          </tr>
+        </thead>
+        <tbody id="clf-tbody"></tbody>
+      </table>
+    </div>
+
+    <!-- Regressor Comparison -->
+    <div class="result-card" id="reg-cmp-card">
+      <div class="result-section-label">Regressor Comparison — R² Score</div>
+      <table class="cmp-table">
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>R²</th>
+            <th>RMSE</th>
+            <th>MAE</th>
+            <th style="width:90px"></th>
+          </tr>
+        </thead>
+        <tbody id="reg-tbody"></tbody>
+      </table>
+    </div>
+
+  </div>
+</div>
+
+<script>
+  // Scroll reveal
+  const obs = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+  }), { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  function selectSpecies(btn, val) {
+    document.querySelectorAll('.species-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('species').value = val;
+  }
+
+  async function runPrediction() {
+    const btn = document.getElementById('predict-btn');
+    const spinner = document.getElementById('spinner');
+    const btnText = document.getElementById('btn-text');
+    btn.disabled = true;
+    spinner.style.display = 'block';
+    btnText.textContent = 'Running models...';
+
+    const fd = new FormData();
+    ['mol_weight','clogp','heavy_atoms','ring_count','double_bonds',
+     'oh_groups','water_solubility','duration','ph','temperature',
+     'exposure_type','species'].forEach(id => {
+      fd.append(id, document.getElementById(id).value);
+    });
+
+    try {
+      const res = await fetch('/api/predict', { method: 'POST', body: fd });
+      const data = await res.json();
+      renderResults(data);
+    } catch(e) {
+      alert('Prediction failed — make sure the Flask server is running.');
+    } finally {
+      btn.disabled = false;
+      spinner.style.display = 'none';
+      btnText.textContent = '🔬 Run ML Prediction';
+    }
+  }
+
+  function showCard(id) {
+    const el = document.getElementById(id);
+    el.classList.add('show');
+  }
+
+  function renderResults(data) {
+    document.getElementById('placeholder').style.display = 'none';
+
+    const clf = data.classification;
+    const reg = data.regression;
+    const isAcute = clf.prediction === 1;
+    const cls = isAcute ? 'toxic' : 'safe';
+
+    // Classification card
+    showCard('clf-card');
+    document.getElementById('clf-badge').innerHTML = `
+      <div class="clf-label-badge ${cls}">
+        ${isAcute ? '⚠️ Acute 1 — LC50 ≤ 1 mg/L' : '✅ Not Acute 1 — LC50 > 1 mg/L'}
+      </div>`;
+    const probEl = document.getElementById('prob-number');
+    probEl.textContent = clf.acute1_prob + '%';
+    probEl.className = `prob-number ${cls}`;
+    const barEl = document.getElementById('prob-bar');
+    barEl.className = `prob-bar-fill ${cls}`;
+    setTimeout(() => { barEl.style.width = clf.acute1_prob + '%'; }, 50);
+    document.getElementById('best-clf').textContent = clf.best_model;
+
+    // Regression card
+    showCard('reg-card');
+    document.getElementById('lc50-val').textContent = reg.lc50_pred;
+    document.getElementById('log-lc50-val').textContent = reg.log_lc50;
+    document.getElementById('best-r2-val').textContent = reg.best_r2;
+    document.getElementById('best-reg-name').textContent = reg.best_model;
+
+    // Classifier table
+    showCard('clf-cmp-card');
+    const maxAuc = Math.max(...data.clf_comparison.map(r => r.roc_auc));
+    document.getElementById('clf-tbody').innerHTML = data.clf_comparison.map(r => `
+      <tr class="${r.roc_auc === maxAuc ? 'best' : ''}">
+        <td>${r.roc_auc === maxAuc ? '🏆 ' : ''}${r.model}</td>
+        <td>${r.roc_auc}</td>
+        <td>${r.accuracy}</td>
+        <td>${r.f1}</td>
+        <td><div class="bar-cell"><div class="mini-bg"><div class="mini-fill" style="width:${r.roc_auc*100}%"></div></div></div></td>
+      </tr>`).join('');
+
+    // Regressor table
+    showCard('reg-cmp-card');
+    const maxR2 = Math.max(...data.reg_comparison.map(r => r.r2));
+    document.getElementById('reg-tbody').innerHTML = data.reg_comparison.map(r => `
+      <tr class="${r.r2 === maxR2 ? 'best' : ''}">
+        <td>${r.r2 === maxR2 ? '🏆 ' : ''}${r.model}</td>
+        <td>${r.r2}</td>
+        <td>${r.rmse}</td>
+        <td>${r.mae}</td>
+        <td><div class="bar-cell"><div class="mini-bg"><div class="mini-fill" style="width:${Math.max(0,r.r2)*100}%"></div></div></div></td>
+      </tr>`).join('');
+  }
+</script>
+{% endblock %}

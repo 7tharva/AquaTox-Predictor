@@ -1,0 +1,433 @@
+{% extends "base.html" %}
+{% block title %}About — AquaTox Predictor{% endblock %}
+
+{% block head %}
+<style>
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s cubic-bezier(.22,.61,.36,1),
+                transform 0.6s cubic-bezier(.22,.61,.36,1);
+  }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+  .reveal-delay-1 { transition-delay: 0.08s; }
+  .reveal-delay-2 { transition-delay: 0.16s; }
+  .reveal-delay-3 { transition-delay: 0.24s; }
+  .reveal-delay-4 { transition-delay: 0.32s; }
+
+  /* PAGE HEADER */
+  .page-header {
+    margin-bottom: 2.5rem;
+    animation: fadeUp 0.7s cubic-bezier(.22,.61,.36,1) both;
+  }
+  .page-header h2 {
+    font-size: 1.6rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.3rem;
+    color: #111827;
+  }
+  .page-header p { font-size: 0.9rem; color: #6b7280; }
+
+  /* SECTION */
+  .about-section { margin-bottom: 3.5rem; }
+  .section-eyebrow {
+    font-size: 0.68rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #0ea5e9;
+    margin-bottom: 0.5rem;
+  }
+  .section-heading {
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: #111827;
+    margin-bottom: 0.5rem;
+  }
+  .section-sub {
+    font-size: 0.875rem;
+    color: #6b7280;
+    line-height: 1.7;
+    max-width: 560px;
+    margin-bottom: 1.75rem;
+  }
+
+  /* CARDS */
+  .about-card {
+    background: white;
+    border: 1px solid #f1f5f9;
+    border-radius: 14px;
+    padding: 1.5rem 1.75rem;
+    transition: border-color 0.2s, transform 0.2s;
+  }
+  .about-card:hover { border-color: #e0f2fe; transform: translateY(-1px); }
+  .about-card h3 {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 1.25rem; }
+  .three-col { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 1.25rem; }
+
+  /* METRIC ROWS */
+  .metric-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.45rem 0;
+    border-bottom: 1px solid #f9fafb;
+    font-size: 0.85rem;
+  }
+  .metric-row:last-child { border-bottom: none; }
+  .metric-row .mn { color: #374151; }
+  .metric-row .mv { color: #0ea5e9; font-weight: 700; font-size: 0.82rem; }
+
+  /* BULLET LIST */
+  .bullet-list { list-style: none; padding: 0; }
+  .bullet-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid #f9fafb;
+    font-size: 0.85rem;
+    color: #374151;
+    line-height: 1.55;
+  }
+  .bullet-list li:last-child { border-bottom: none; }
+  .bullet-list li::before {
+    content: "→";
+    color: #0ea5e9;
+    font-weight: 700;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  /* TIMELINE */
+  .timeline { list-style: none; padding: 0; position: relative; }
+  .timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px; top: 0; bottom: 0;
+    width: 2px;
+    background: #f1f5f9;
+  }
+  .timeline li {
+    display: flex;
+    gap: 1.25rem;
+    padding-bottom: 1.5rem;
+    position: relative;
+  }
+  .timeline li:last-child { padding-bottom: 0; }
+  .tl-dot {
+    width: 30px; height: 30px;
+    border-radius: 50%;
+    background: #0ea5e9;
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 800;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    z-index: 1;
+    transition: transform 0.2s;
+  }
+  .timeline li:hover .tl-dot { transform: scale(1.15); }
+  .tl-dot.done { background: #22c55e; }
+  .tl-body h4 {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #111827;
+    margin-bottom: 0.25rem;
+  }
+  .tl-body p { font-size: 0.82rem; color: #6b7280; line-height: 1.65; }
+
+  /* PERFORMANCE BAR */
+  .perf-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.45rem 0;
+    font-size: 0.85rem;
+  }
+  .perf-name { width: 160px; flex-shrink: 0; color: #374151; }
+  .perf-bar-bg {
+    flex: 1;
+    height: 6px;
+    background: #f1f5f9;
+    border-radius: 999px;
+    overflow: hidden;
+  }
+  .perf-bar-fill {
+    height: 100%;
+    border-radius: 999px;
+    background: #0ea5e9;
+    transition: width 1s cubic-bezier(.22,.61,.36,1);
+    width: 0%;
+  }
+  .perf-bar-fill.gold { background: #f59e0b; }
+  .perf-val { width: 50px; text-align: right; font-weight: 700; color: #0ea5e9; font-size: 0.82rem; }
+
+  /* SHAP INSIGHT CARDS */
+  .shap-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; }
+  .shap-card {
+    background: #f9fafb;
+    border-radius: 10px;
+    padding: 1rem;
+    border-left: 3px solid #0ea5e9;
+  }
+  .shap-card .sc-feat {
+    font-size: 0.78rem;
+    font-weight: 700;
+    color: #0284c7;
+    font-family: monospace;
+    margin-bottom: 0.3rem;
+  }
+  .shap-card .sc-desc { font-size: 0.8rem; color: #6b7280; line-height: 1.5; }
+
+  /* TECH TAGS */
+  .tag-cloud { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 0.75rem; }
+  .tag {
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 7px;
+    padding: 0.25rem 0.65rem;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: #374151;
+    transition: all 0.15s;
+  }
+  .tag:hover { background: #f0f9ff; border-color: #bae6fd; color: #0284c7; }
+
+  /* LIMITATIONS */
+  .limit-card {
+    background: #fffbeb;
+    border: 1px solid #fde68a;
+    border-radius: 14px;
+    padding: 1.5rem 1.75rem;
+  }
+  .limit-card h3 { color: #92400e; }
+  .limit-card .bullet-list li { color: #78350f; }
+  .limit-card .bullet-list li::before { color: #d97706; }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<div class="page-header">
+  <h2>About This Project</h2>
+  <p>A full machine learning pipeline for aquatic toxicity prediction — built for ENGG2112.</p>
+</div>
+
+<!-- OVERVIEW + DATASET -->
+<div class="about-section">
+  <div class="reveal">
+    <div class="section-eyebrow">Overview</div>
+    <div class="section-heading">What is AquaTox Predictor?</div>
+  </div>
+  <div class="two-col">
+    <div class="about-card reveal reveal-delay-1">
+      <h3>🎯 Project Goal</h3>
+      <ul class="bullet-list">
+        <li>Predict LC50/EC50 aquatic toxicity without animal testing</li>
+        <li>Binary classification — Acute 1 (LC50 ≤ 1 mg/L) vs non-toxic</li>
+        <li>Regression — predict exact log(LC50) concentration</li>
+        <li>SHAP explainability for every model's predictions</li>
+        <li>Grouped cross-validation to prevent chemical data leakage</li>
+        <li>13 models tuned end-to-end with GridSearchCV</li>
+      </ul>
+    </div>
+    <div class="about-card reveal reveal-delay-2">
+      <h3>📦 Dataset — ADORE t-F2F</h3>
+      <div class="metric-row"><span class="mn">Challenge</span><span class="mv">t-F2F (Fish → Fish)</span></div>
+      <div class="metric-row"><span class="mn">Tax Group</span><span class="mv">Fish (Mortality)</span></div>
+      <div class="metric-row"><span class="mn">Endpoint</span><span class="mv">LC50</span></div>
+      <div class="metric-row"><span class="mn">Effect Filter</span><span class="mv">MOR</span></div>
+      <div class="metric-row"><span class="mn">Training rows</span><span class="mv">~26,000</span></div>
+      <div class="metric-row"><span class="mn">Features used</span><span class="mv">150+</span></div>
+      <div class="metric-row"><span class="mn">Train / test split</span><span class="mv">80 / 20 (grouped)</span></div>
+      <div class="metric-row"><span class="mn">Seed</span><span class="mv">42</span></div>
+    </div>
+  </div>
+</div>
+
+<!-- PIPELINE -->
+<div class="about-section">
+  <div class="reveal">
+    <div class="section-eyebrow">Architecture</div>
+    <div class="section-heading">Pipeline steps</div>
+    <div class="section-sub">Every step designed to maximise scientific rigour and prevent leakage.</div>
+  </div>
+  <div class="about-card reveal reveal-delay-1">
+    <ul class="timeline">
+      <li>
+        <div class="tl-dot">1</div>
+        <div class="tl-body">
+          <h4>Data Loading & Filtering</h4>
+          <p>CSV loaded with smart column selection — only columns needed are read into memory. Filtered by tax group (fish), endpoint (LC50), and effect (MOR). Chemical DTX IDs used as group identifiers.</p>
+        </div>
+      </li>
+      <li>
+        <div class="tl-dot">2</div>
+        <div class="tl-body">
+          <h4>Feature Engineering</h4>
+          <p>Numeric features (experimental + chemical), one-hot categorical encoding, and bit-expanded molecular fingerprints (PubChem, MACCS, Morgan, ToxPrint — top 128 most variable bits each). Mordred descriptors and Mol2Vec embeddings included where present. Leakage check built in.</p>
+        </div>
+      </li>
+      <li>
+        <div class="tl-dot">3</div>
+        <div class="tl-body">
+          <h4>Grouped Train / Test Split</h4>
+          <p>StratifiedGroupKFold with 5 splits. Class balance preserved. No chemical appears in both train and test folds — prevents inflated metrics from structural analogues.</p>
+        </div>
+      </li>
+      <li>
+        <div class="tl-dot">4</div>
+        <div class="tl-body">
+          <h4>Model Tuning with GridSearchCV</h4>
+          <p>7 classifiers and 6 regressors each wrapped in a sklearn Pipeline: Imputer → VarianceThreshold → SelectKBest (up to 150 features) → optional StandardScaler → model. Tuned with 3-fold grouped CV.</p>
+        </div>
+      </li>
+      <li>
+        <div class="tl-dot">5</div>
+        <div class="tl-body">
+          <h4>SHAP Explainability</h4>
+          <p>TreeExplainer for XGBoost, LightGBM, Random Forest. KernelExplainer for LR, NB, KNN, MLP. Summary bar, beeswarm, and cross-model comparison plots for all 13 models.</p>
+        </div>
+      </li>
+      <li>
+        <div class="tl-dot done">6</div>
+        <div class="tl-body">
+          <h4>Prediction & Deployment</h4>
+          <p>Models saved with joblib and loaded into this Flask app at startup. New compounds evaluated in real time using the full trained pipeline.</p>
+        </div>
+      </li>
+    </ul>
+  </div>
+</div>
+
+<!-- MODEL PERFORMANCE -->
+<div class="about-section">
+  <div class="reveal">
+    <div class="section-eyebrow">Results</div>
+    <div class="section-heading">Model performance</div>
+    <div class="section-sub">Evaluated on a held-out grouped test set of ~5,200 fish mortality records.</div>
+  </div>
+
+  <div class="two-col">
+    <div class="about-card reveal reveal-delay-1">
+      <h3>🏆 Classification — ROC AUC</h3>
+      <div class="perf-row"><span class="perf-name">XGBoost</span><div class="perf-bar-bg"><div class="perf-bar-fill gold" data-width="88.5"></div></div><span class="perf-val">0.885</span></div>
+      <div class="perf-row"><span class="perf-name">MLP</span><div class="perf-bar-bg"><div class="perf-bar-fill" data-width="88.2"></div></div><span class="perf-val">0.882</span></div>
+      <div class="perf-row"><span class="perf-name">Random Forest</span><div class="perf-bar-bg"><div class="perf-bar-fill" data-width="86.2"></div></div><span class="perf-val">0.862</span></div>
+      <div class="perf-row"><span class="perf-name">LightGBM</span><div class="perf-bar-bg"><div class="perf-bar-fill" data-width="85.9"></div></div><span class="perf-val">0.859</span></div>
+      <div class="perf-row"><span class="perf-name">Gaussian NB</span><div class="perf-bar-bg"><div class="perf-bar-fill" data-width="84.7"></div></div><span class="perf-val">0.847</span></div>
+      <div class="perf-row"><span class="perf-name">KNN</span><div class="perf-bar-bg"><div class="perf-bar-fill" data-width="81.0"></div></div><span class="perf-val">0.810</span></div>
+      <div class="perf-row"><span class="perf-name">Logistic Regression</span><div class="perf-bar-bg"><div class="perf-bar-fill" data-width="79.3"></div></div><span class="perf-val">0.793</span></div>
+    </div>
+    <div class="about-card reveal reveal-delay-2">
+      <h3>📈 Key SHAP Findings</h3>
+      <div class="shap-grid" style="margin-bottom:1rem">
+        <div class="shap-card">
+          <div class="sc-feat">chem_rdkit_clogp</div>
+          <div class="sc-desc">Lipophilicity — most consistent predictor across XGBoost, LightGBM and MLP</div>
+        </div>
+        <div class="shap-card">
+          <div class="sc-feat">chem_mordred_ATS4Z</div>
+          <div class="sc-desc">Dominates LightGBM with SHAP value of 0.81 — atomic topological descriptor</div>
+        </div>
+        <div class="shap-card">
+          <div class="sc-feat">chem_mol2vec*</div>
+          <div class="sc-desc">Neural molecular embeddings appear in top features of every single model</div>
+        </div>
+      </div>
+      <ul class="bullet-list">
+        <li>Tree models rely on fewer dominant features; linear models spread importance across many</li>
+        <li>Baseline L2 coefficient for chem_mw was +100 — shrinks to ~1 with C=1 regularisation</li>
+        <li>L2 sweep shows AUC improves as C decreases — strong regularisation needed here</li>
+      </ul>
+    </div>
+  </div>
+</div>
+
+<!-- TECH STACK -->
+<div class="about-section">
+  <div class="reveal">
+    <div class="section-eyebrow">Stack</div>
+    <div class="section-heading">Technology used</div>
+  </div>
+  <div class="about-card reveal reveal-delay-1">
+    <div class="tag-cloud">
+      <span class="tag">Python 3.14</span>
+      <span class="tag">scikit-learn</span>
+      <span class="tag">XGBoost</span>
+      <span class="tag">LightGBM</span>
+      <span class="tag">SHAP</span>
+      <span class="tag">Flask</span>
+      <span class="tag">pandas</span>
+      <span class="tag">numpy</span>
+      <span class="tag">matplotlib</span>
+      <span class="tag">seaborn</span>
+      <span class="tag">joblib</span>
+      <span class="tag">Mordred</span>
+      <span class="tag">Mol2Vec</span>
+      <span class="tag">ADORE Dataset</span>
+      <span class="tag">GridSearchCV</span>
+      <span class="tag">StratifiedGroupKFold</span>
+      <span class="tag">SelectKBest</span>
+      <span class="tag">TreeExplainer</span>
+      <span class="tag">KernelExplainer</span>
+    </div>
+  </div>
+</div>
+
+<!-- LIMITATIONS -->
+<div class="about-section">
+  <div class="reveal">
+    <div class="section-eyebrow">Caveats</div>
+    <div class="section-heading">Limitations & notes</div>
+  </div>
+  <div class="limit-card reveal reveal-delay-1">
+    <h3>⚠️ Important caveats</h3>
+    <ul class="bullet-list">
+      <li>Predictions trained on t-F2F (fish mortality) only — crustacean and algae challenges require separate models</li>
+      <li>Molecular fingerprints and Mordred descriptors not computed from SMILES in this interface — structural features default to zero, reducing prediction quality</li>
+      <li>KernelExplainer SHAP values capped at 300 samples for runtime — approximate for kernel-based models</li>
+      <li>Grouped CV prevents same-chemical leakage but dataset may still contain structural analogues across groups</li>
+      <li>Log-transformation applied to LC50 before regression — predictions back-transformed with expm1</li>
+    </ul>
+  </div>
+</div>
+
+<script>
+  // Scroll reveal
+  const obs = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
+  }), { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+
+  // Animate performance bars when visible
+  const barObs = new IntersectionObserver(es => es.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.querySelectorAll('.perf-bar-fill').forEach(bar => {
+        setTimeout(() => { bar.style.width = bar.dataset.width + '%'; }, 100);
+      });
+      barObs.unobserve(e.target);
+    }
+  }), { threshold: 0.3 });
+  document.querySelectorAll('.about-card').forEach(c => barObs.observe(c));
+</script>
+{% endblock %}
