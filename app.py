@@ -8,12 +8,13 @@ from model_store import load_models, models_exist
 
 app = Flask(__name__)
 
-# ── Load models once at startup ───────────────────────────────────────────────
-if not models_exist():
-    raise RuntimeError("No saved models found! Run main.py first.")
-
-clf_models, reg_models, feat_cols, clf_compare, reg_compare = load_models()
-print(f"  Loaded {len(clf_models)} classifiers and {len(reg_models)} regressors")
+MODELS_LOADED = False
+if models_exist():
+    clf_models, reg_models, feat_cols, clf_compare, reg_compare = load_models()
+    MODELS_LOADED = True
+    print(f"  Loaded {len(clf_models)} classifiers and {len(reg_models)} regressors")
+else:
+    print("  WARNING: No saved models found — prediction disabled")
 
 
 def build_input_row(form) -> pd.DataFrame:
