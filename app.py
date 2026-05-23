@@ -5,6 +5,8 @@ import numpy as np
 import pandas as pd
 from flask import Flask, render_template, request, jsonify
 from model_store import load_models, models_exist
+from download_models import download_models
+download_models()
 
 app = Flask(__name__)
 
