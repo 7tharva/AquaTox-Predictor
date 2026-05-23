@@ -1,9 +1,0 @@
-{
-  "challenge":"t-F2F",
-  "rows":25976,
-  "features":1544,
-  "best_model":"XGBoost",
-  "best_roc_auc":0.8849,
-  "best_accuracy":0.8238,
-  "best_macro_f1":0.8159
-}
