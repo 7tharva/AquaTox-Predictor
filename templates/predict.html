@@ -2,6 +2,7 @@
 {% block title %}Predict — AquaTox Predictor{% endblock %}
 
 {% block head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <style>
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(20px); }
@@ -27,7 +28,6 @@
   .reveal-delay-2 { transition-delay: 0.16s; }
   .reveal-delay-3 { transition-delay: 0.24s; }
 
-  /* PAGE HEADER */
   .page-header {
     margin-bottom: 2rem;
     animation: fadeUp 0.7s cubic-bezier(.22,.61,.36,1) both;
@@ -41,7 +41,6 @@
   }
   .page-header p { font-size: 0.9rem; color: #6b7280; }
 
-  /* LAYOUT */
   .predict-layout {
     display: grid;
     grid-template-columns: 360px 1fr;
@@ -49,7 +48,6 @@
     align-items: start;
   }
 
-  /* INPUT PANEL */
   .input-panel {
     display: flex;
     flex-direction: column;
@@ -74,7 +72,6 @@
     margin-bottom: 0.85rem;
   }
 
-  /* SPECIES SELECTOR */
   .species-row { display: flex; gap: 0.5rem; }
   .species-btn {
     flex: 1;
@@ -96,15 +93,10 @@
     color: #0284c7;
   }
 
-  /* FORM ELEMENTS */
   .field { display: flex; flex-direction: column; gap: 0.3rem; margin-bottom: 0.75rem; }
   .field:last-child { margin-bottom: 0; }
   .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 0.65rem; }
-  .field label {
-    font-size: 0.75rem;
-    font-weight: 600;
-    color: #6b7280;
-  }
+  .field label { font-size: 0.75rem; font-weight: 600; color: #6b7280; }
   .field input[type="number"],
   .field select {
     padding: 0.5rem 0.7rem;
@@ -124,7 +116,6 @@
     box-shadow: 0 0 0 3px rgba(14,165,233,0.1);
   }
 
-  /* SLIDERS */
   .slider-field { margin-bottom: 0.85rem; }
   .slider-field:last-child { margin-bottom: 0; }
   .slider-top {
@@ -148,7 +139,6 @@
     height: 4px;
   }
 
-  /* PREDICT BUTTON */
   .predict-btn {
     width: 100%;
     padding: 0.9rem;
@@ -184,7 +174,6 @@
   }
   @keyframes spin { to { transform: rotate(360deg); } }
 
-  /* RESULTS PANEL */
   .results-panel {
     display: flex;
     flex-direction: column;
@@ -192,7 +181,6 @@
     animation: fadeUp 0.7s cubic-bezier(.22,.61,.36,1) 0.2s both;
   }
 
-  /* PLACEHOLDER */
   .placeholder-card {
     background: white;
     border: 1.5px dashed #e5e7eb;
@@ -204,7 +192,6 @@
   .placeholder-card .icon { font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.5; }
   .placeholder-card p { font-size: 0.875rem; line-height: 1.6; }
 
-  /* RESULT CARDS */
   .result-card {
     background: white;
     border: 1px solid #f1f5f9;
@@ -224,7 +211,6 @@
     margin-bottom: 1rem;
   }
 
-  /* CLASSIFICATION HERO */
   .clf-hero {
     display: flex;
     align-items: center;
@@ -246,12 +232,7 @@
   .clf-label-badge.safe  { background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0; }
 
   .prob-block { text-align: right; }
-  .prob-number {
-    font-size: 2rem;
-    font-weight: 800;
-    letter-spacing: -0.03em;
-    line-height: 1;
-  }
+  .prob-number { font-size: 2rem; font-weight: 800; letter-spacing: -0.03em; line-height: 1; }
   .prob-number.toxic { color: #ef4444; }
   .prob-number.safe  { color: #22c55e; }
   .prob-label { font-size: 0.75rem; color: #9ca3af; margin-top: 0.2rem; }
@@ -272,14 +253,9 @@
   .prob-bar-fill.toxic { background: #ef4444; }
   .prob-bar-fill.safe  { background: #22c55e; }
 
-  .best-model-note {
-    font-size: 0.78rem;
-    color: #9ca3af;
-    margin-top: 0.4rem;
-  }
+  .best-model-note { font-size: 0.78rem; color: #9ca3af; margin-top: 0.4rem; }
   .best-model-note span { color: #374151; font-weight: 600; }
 
-  /* REGRESSION HERO */
   .reg-hero {
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
@@ -293,15 +269,9 @@
     text-align: center;
   }
   .reg-metric .rm-label { font-size: 0.72rem; color: #9ca3af; font-weight: 600; margin-bottom: 0.3rem; }
-  .reg-metric .rm-value {
-    font-size: 1.4rem;
-    font-weight: 800;
-    color: #111827;
-    letter-spacing: -0.02em;
-  }
+  .reg-metric .rm-value { font-size: 1.4rem; font-weight: 800; color: #111827; letter-spacing: -0.02em; }
   .reg-metric .rm-unit { font-size: 0.72rem; color: #9ca3af; margin-top: 0.15rem; }
 
-  /* COMPARISON TABLES */
   .cmp-table { width: 100%; border-collapse: collapse; font-size: 0.82rem; }
   .cmp-table th {
     text-align: left;
@@ -313,11 +283,7 @@
     color: #9ca3af;
     border-bottom: 1px solid #f1f5f9;
   }
-  .cmp-table td {
-    padding: 0.5rem 0.6rem;
-    border-bottom: 1px solid #f9fafb;
-    color: #374151;
-  }
+  .cmp-table td { padding: 0.5rem 0.6rem; border-bottom: 1px solid #f9fafb; color: #374151; }
   .cmp-table tr:last-child td { border-bottom: none; }
   .cmp-table tr.best td { background: #f0f9ff; font-weight: 600; color: #0284c7; }
 
@@ -325,7 +291,22 @@
   .mini-bg { flex: 1; height: 5px; background: #f1f5f9; border-radius: 999px; overflow: hidden; }
   .mini-fill { height: 100%; border-radius: 999px; background: #0ea5e9; transition: width 0.6s ease; }
 
-  .hr { border: none; border-top: 1px solid #f1f5f9; margin: 1.25rem 0; }
+  /* CHARTS */
+  .charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 0.5rem;
+  }
+  .chart-section-label {
+    font-size: 0.72rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.75rem;
+  }
+  .chart-section-label.clf { color: #0ea5e9; }
+  .chart-section-label.reg { color: #3A9E6F; }
 </style>
 {% endblock %}
 
@@ -338,9 +319,8 @@
 
 <div class="predict-layout">
 
-  <!-- ── INPUT PANEL ── -->
+  <!-- INPUT PANEL -->
   <div class="input-panel">
-
     <div class="input-card">
       <div class="card-label">Target Species</div>
       <div class="species-row">
@@ -353,7 +333,6 @@
 
     <div class="input-card">
       <div class="card-label">Molecular Structure</div>
-
       <div class="slider-field">
         <div class="slider-top">
           <label>Molecular Weight (g/mol)</label>
@@ -362,7 +341,6 @@
         <input type="range" id="mol_weight" min="18" max="900" value="200"
                oninput="document.getElementById('mw-val').textContent=this.value">
       </div>
-
       <div class="slider-field">
         <div class="slider-top">
           <label>cLogP (Lipophilicity)</label>
@@ -371,7 +349,6 @@
         <input type="range" id="clogp" min="-5" max="12" step="0.1" value="2"
                oninput="document.getElementById('clogp-val').textContent=parseFloat(this.value).toFixed(1)">
       </div>
-
       <div class="field-row">
         <div class="field">
           <label>Heavy Atom Count</label>
@@ -382,7 +359,6 @@
           <input type="number" id="ring_count" value="1" min="0" max="20">
         </div>
       </div>
-
       <div class="field-row" style="margin-top:0.65rem">
         <div class="field">
           <label>Double Bonds</label>
@@ -393,7 +369,6 @@
           <input type="number" id="oh_groups" value="0" min="0" max="20">
         </div>
       </div>
-
       <div class="slider-field" style="margin-top:0.75rem">
         <div class="slider-top">
           <label>Water Solubility (log mol/L)</label>
@@ -406,7 +381,6 @@
 
     <div class="input-card">
       <div class="card-label">Experimental Conditions</div>
-
       <div class="field-row">
         <div class="field">
           <label>Duration (h)</label>
@@ -417,7 +391,6 @@
           <input type="number" id="ph" value="7.4" min="4" max="10" step="0.1">
         </div>
       </div>
-
       <div class="slider-field" style="margin-top:0.75rem">
         <div class="slider-top">
           <label>Temperature (°C)</label>
@@ -426,7 +399,6 @@
         <input type="range" id="temperature" min="4" max="35" value="20"
                oninput="document.getElementById('temp-val').textContent=this.value+'°C'">
       </div>
-
       <div class="field" style="margin-top:0.65rem">
         <label>Exposure Type</label>
         <select id="exposure_type">
@@ -441,13 +413,11 @@
       <span id="btn-text">🔬 Run ML Prediction</span>
       <div class="spinner" id="spinner"></div>
     </button>
-
   </div>
 
-  <!-- ── RESULTS PANEL ── -->
+  <!-- RESULTS PANEL -->
   <div class="results-panel">
 
-    <!-- Placeholder -->
     <div class="placeholder-card" id="placeholder">
       <div class="icon">🧪</div>
       <p>Fill in the chemical properties on the left<br>and click <strong>Run ML Prediction</strong> to see results.</p>
@@ -491,16 +461,28 @@
       </div>
     </div>
 
-    <!-- Classifier Comparison -->
+    <!-- Animated Charts -->
+    <div class="result-card" id="charts-card">
+      <div class="result-section-label">Model Performance — Visual Comparison</div>
+      <div class="charts-grid">
+        <div>
+          <div class="chart-section-label clf">Classifiers — ROC AUC</div>
+          <canvas id="clf-chart"></canvas>
+        </div>
+        <div>
+          <div class="chart-section-label reg">Regressors — R² Score</div>
+          <canvas id="reg-chart"></canvas>
+        </div>
+      </div>
+    </div>
+
+    <!-- Classifier Comparison Table -->
     <div class="result-card" id="clf-cmp-card">
       <div class="result-section-label">Classifier Comparison — ROC AUC</div>
       <table class="cmp-table">
         <thead>
           <tr>
-            <th>Model</th>
-            <th>ROC AUC</th>
-            <th>Accuracy</th>
-            <th>Macro F1</th>
+            <th>Model</th><th>ROC AUC</th><th>Accuracy</th><th>Macro F1</th>
             <th style="width:90px"></th>
           </tr>
         </thead>
@@ -508,16 +490,13 @@
       </table>
     </div>
 
-    <!-- Regressor Comparison -->
+    <!-- Regressor Comparison Table -->
     <div class="result-card" id="reg-cmp-card">
       <div class="result-section-label">Regressor Comparison — R² Score</div>
       <table class="cmp-table">
         <thead>
           <tr>
-            <th>Model</th>
-            <th>R²</th>
-            <th>RMSE</th>
-            <th>MAE</th>
+            <th>Model</th><th>R²</th><th>RMSE</th><th>MAE</th>
             <th style="width:90px"></th>
           </tr>
         </thead>
@@ -529,7 +508,6 @@
 </div>
 
 <script>
-  // Scroll reveal
   const obs = new IntersectionObserver(es => es.forEach(e => {
     if (e.isIntersecting) { e.target.classList.add('visible'); obs.unobserve(e.target); }
   }), { threshold: 0.1 });
@@ -561,7 +539,7 @@
       const data = await res.json();
       renderResults(data);
     } catch(e) {
-      alert('Prediction failed — make sure the Flask server is running.');
+      alert('Prediction unavailable on the live demo — models are hosted locally. Run the app locally for full predictions.');
     } finally {
       btn.disabled = false;
       spinner.style.display = 'none';
@@ -570,9 +548,20 @@
   }
 
   function showCard(id) {
-    const el = document.getElementById(id);
-    el.classList.add('show');
+    document.getElementById(id).classList.add('show');
   }
+
+  const MODEL_COLOURS = {
+    "XGBoost":             "#E07B39",
+    "MLP":                 "#C0392B",
+    "Random Forest":       "#2C6E94",
+    "LightGBM":            "#3A9E6F",
+    "Gaussian NB":         "#7F8C8D",
+    "KNN":                 "#1ABC9C",
+    "Logistic Regression": "#A85C9E",
+    "Ridge":               "#2C6E94",
+    "Lasso":               "#A85C9E",
+  };
 
   function renderResults(data) {
     document.getElementById('placeholder').style.display = 'none';
@@ -602,6 +591,75 @@
     document.getElementById('log-lc50-val').textContent = reg.log_lc50;
     document.getElementById('best-r2-val').textContent = reg.best_r2;
     document.getElementById('best-reg-name').textContent = reg.best_model;
+
+    // ── Animated Charts ──────────────────────────────────────────────────────
+    showCard('charts-card');
+
+    if (window._clfChart) window._clfChart.destroy();
+    if (window._regChart) window._regChart.destroy();
+
+    const chartDefaults = {
+      indexAxis: 'y',
+      animation: {
+        duration: 1000,
+        easing: 'easeOutQuart',
+        from: 0,
+      },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: { label: ctx => ` ${ctx.parsed.x.toFixed(3)}` }
+        }
+      },
+      scales: {
+        x: {
+          grid: { color: '#f1f5f9' },
+          ticks: { font: { size: 10 }, color: '#6b7280' }
+        },
+        y: {
+          grid: { display: false },
+          ticks: { font: { size: 10 }, color: '#374151' }
+        }
+      }
+    };
+
+    // Classifier chart — sorted ascending so best is at top
+    const clfSorted = [...data.clf_comparison].sort((a,b) => a.roc_auc - b.roc_auc);
+    window._clfChart = new Chart(document.getElementById('clf-chart'), {
+      type: 'bar',
+      data: {
+        labels: clfSorted.map(r => r.model),
+        datasets: [{
+          data: clfSorted.map(r => r.roc_auc),
+          backgroundColor: clfSorted.map(r => MODEL_COLOURS[r.model] || '#0ea5e9'),
+          borderRadius: 5,
+          barThickness: 14,
+        }]
+      },
+      options: {
+        ...chartDefaults,
+        scales: {
+          ...chartDefaults.scales,
+          x: { ...chartDefaults.scales.x, min: 0.5, max: 1.0 }
+        }
+      }
+    });
+
+    // Regressor chart — sorted ascending so best is at top
+    const regSorted = [...data.reg_comparison].sort((a,b) => a.r2 - b.r2);
+    window._regChart = new Chart(document.getElementById('reg-chart'), {
+      type: 'bar',
+      data: {
+        labels: regSorted.map(r => r.model),
+        datasets: [{
+          data: regSorted.map(r => Math.max(0, r.r2)),
+          backgroundColor: regSorted.map(r => MODEL_COLOURS[r.model] || '#3A9E6F'),
+          borderRadius: 5,
+          barThickness: 14,
+        }]
+      },
+      options: chartDefaults
+    });
 
     // Classifier table
     showCard('clf-cmp-card');
